@@ -1,23 +1,25 @@
 pipeline {
     agent any
+
     environment {
-        DOCKERHUB_CREDENTIALS = 'docker-creds'  // Jenkins credentials ID
-        IMAGE_NAME = 'veeradockerhub/flipkart-frontend'
-        IMAGE_TAG = 'latest'
+        DOCKER_HUB = 'veeradockerhub'
+        IMAGE_NAME = 'flipkart-frontend'
+        IMAGE_TAG  = 'latest'
+        RECIPIENTS = 'veeraprasad.koduri@gmail.com'
     }
+
     stages {
+
+        stage('Checkout Code') {
+            steps {
+                git url: 'https://github.com/veeraprasadkoduri-cmd/Flipkart_app.git', branch: 'main'
+            }
+        }
 
         stage('Clean Workspace') {
             steps {
                 echo "Cleaning workspace..."
                 deleteDir()
-            }
-        }
-
-        stage('Clone Repo') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/veeraprasadkoduri-cmd/Flipkart_app.git'
             }
         }
 
@@ -32,57 +34,79 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('client') {
-                    sh 'CI=false npm run build'
+                    sh '''
+                        CI=false npm run build
+                    '''
                 }
-                sh 'rm -rf frontend-artifact && mkdir frontend-artifact'
-                sh 'cp -r client/build/asset-manifest.json client/build/favicon.ico client/build/index.html client/build/logo192.png client/build/logo512.png client/build/manifest.json client/build/robots.txt client/build/static frontend-artifact/'
+            }
+        }
+
+        stage('Prepare Artifact') {
+            steps {
+                sh '''
+                    rm -rf frontend-artifact
+                    mkdir frontend-artifact
+                    cp -r client/build/* frontend-artifact/
+                '''
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                sh "docker build -t ${DOCKER_HUB}/${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
-        stage('Login to Docker Hub') {
+        stage('Docker Login & Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${docker-creds}", 
-                                                 usernameVariable: 'DOCKER_USER', 
-                                                 passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-creds', 
+                    usernameVariable: 'DOCKER_USER', 
+                    passwordVariable: 'DOCKER_PASS')]) {
+                    
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker push ${DOCKER_HUB}/${IMAGE_NAME}:${IMAGE_TAG}
+                    '''
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Run Docker Container (Optional)') {
             steps {
-                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh '''
+                    docker stop flipkart-frontend || true
+                    docker rm flipkart-frontend || true
+                    docker run -d -p 8080:80 --name flipkart-frontend ${DOCKER_HUB}/${IMAGE_NAME}:${IMAGE_TAG}
+                '''
             }
         }
 
-        stage('Run Docker Container') {
-            steps {
-                sh """
-                docker stop flipkart-frontend || true
-                docker rm flipkart-frontend || true
-                docker run -d --name flipkart-frontend -p 70:80 ${IMAGE_NAME}:${IMAGE_TAG}
-                """
-            }
-        }
     }
 
     post {
-        always {
-            echo "Pipeline finished."
-        }
         success {
-            echo "Pipeline succeeded!"
+            echo "✅ Flipkart Frontend pipeline completed successfully!"
+            emailext (
+                to: "${RECIPIENTS}",
+                subject: "Jenkins Pipeline Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """The Flipkart Frontend pipeline completed successfully!
+Job: ${env.JOB_NAME}
+Build: ${env.BUILD_NUMBER}
+Check console output at: ${env.BUILD_URL}"""
+            )
         }
+
         failure {
-            echo "Pipeline failed! Check logs."
+            echo "❌ Pipeline failed! Check logs for errors."
+            emailext (
+                to: "${RECIPIENTS}",
+                subject: "Jenkins Pipeline Failure: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """The Flipkart Frontend pipeline failed!
+Job: ${env.JOB_NAME}
+Build: ${env.BUILD_NUMBER}
+Check console output at: ${env.BUILD_URL}"""
+            )
         }
     }
 }
