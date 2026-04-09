@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'  // Jenkins credentials ID
-        IMAGE_NAME = 'veeraprasadkoduri/flipkart-frontend'
+        DOCKERHUB_CREDENTIALS = 'docker-creds'  // Jenkins credentials ID
+        IMAGE_NAME = 'veeradockerhub/flipkart-frontend'
         IMAGE_TAG = 'latest'
     }
     stages {
@@ -49,7 +49,7 @@ pipeline {
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
+                withCredentials([usernamePassword(credentialsId: "${docker-creds}", 
                                                  usernameVariable: 'DOCKER_USER', 
                                                  passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
@@ -68,7 +68,7 @@ pipeline {
                 sh """
                 docker stop flipkart-frontend || true
                 docker rm flipkart-frontend || true
-                docker run -d --name flipkart-frontend -p 8080:80 ${IMAGE_NAME}:${IMAGE_TAG}
+                docker run -d --name flipkart-frontend -p 70:80 ${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
