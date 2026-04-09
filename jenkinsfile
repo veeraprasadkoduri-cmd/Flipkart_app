@@ -1,27 +1,29 @@
 pipeline {
     agent any
-
     environment {
-        FRONTEND_DIR = 'client'
-        ARTIFACT_DIR = 'frontend-artifact'
-        DOCKER_IMAGE = 'veeraprasadkoduri/flipkart-frontend:latest'
-        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'
+        DOCKERHUB_CREDENTIALS = 'dockerhub-creds'  // Jenkins credentials ID
+        IMAGE_NAME = 'veeraprasadkoduri/flipkart-frontend'
+        IMAGE_TAG = 'latest'
     }
-
     stages {
+
         stage('Clean Workspace') {
-            steps { deleteDir() }
+            steps {
+                echo "Cleaning workspace..."
+                deleteDir()
+            }
         }
 
         stage('Clone Repo') {
             steps {
-                git url: 'https://github.com/veeraprasadkoduri-cmd/Flipkart_app.git', branch: 'main'
+                git branch: 'main',
+                    url: 'https://github.com/veeraprasadkoduri-cmd/Flipkart_app.git'
             }
         }
 
         stage('Install Frontend Dependencies') {
             steps {
-                dir("${FRONTEND_DIR}") {
+                dir('client') {
                     sh 'npm install'
                 }
             }
@@ -29,29 +31,27 @@ pipeline {
 
         stage('Build Frontend') {
             steps {
-                dir("${FRONTEND_DIR}") {
+                dir('client') {
                     sh 'CI=false npm run build'
                 }
-                sh "rm -rf ${ARTIFACT_DIR} && mkdir ${ARTIFACT_DIR}"
-                sh "cp -r ${FRONTEND_DIR}/build/* ${ARTIFACT_DIR}/"
-            }
-        }
-
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: "${ARTIFACT_DIR}/**", fingerprint: true
+                sh 'rm -rf frontend-artifact && mkdir frontend-artifact'
+                sh 'cp -r client/build/asset-manifest.json client/build/favicon.ico client/build/index.html client/build/logo192.png client/build/logo512.png client/build/manifest.json client/build/robots.txt client/build/static frontend-artifact/'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE} ."
+                sh """
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
             }
         }
 
         stage('Login to Docker Hub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", 
+                                                 usernameVariable: 'DOCKER_USER', 
+                                                 passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
                 }
             }
@@ -59,20 +59,30 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                sh "docker push ${DOCKER_IMAGE}"
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
 
         stage('Run Docker Container') {
             steps {
-                sh "docker rm -f flipkart-frontend || true"
-                sh "docker run -d --name flipkart-frontend -p 80:80 ${DOCKER_IMAGE}"
+                sh """
+                docker stop flipkart-frontend || true
+                docker rm flipkart-frontend || true
+                docker run -d --name flipkart-frontend -p 8080:80 ${IMAGE_NAME}:${IMAGE_TAG}
+                """
             }
         }
     }
 
     post {
-        success { echo 'Frontend Docker container is running on port 80!' }
-        failure { echo 'Pipeline failed. Check logs!' }
+        always {
+            echo "Pipeline finished."
+        }
+        success {
+            echo "Pipeline succeeded!"
+        }
+        failure {
+            echo "Pipeline failed! Check logs."
+        }
     }
 }
