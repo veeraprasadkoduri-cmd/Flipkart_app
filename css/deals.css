@@ -1,0 +1,125 @@
+/* ===== deals.css ===== */
+.deals-section {
+  padding: 0 0 24px;
+}
+
+.deals-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.deals-shelf {
+  background: var(--fk-white);
+  border-radius: 8px;
+  box-shadow: var(--fk-shadow);
+  padding: 20px;
+}
+
+.deals-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Countdown timer */
+.deal-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.timer-label { color: var(--fk-muted); }
+.timer-display {
+  display: flex;
+  gap: 4px;
+}
+.timer-block {
+  background: var(--fk-text);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  min-width: 30px;
+  text-align: center;
+}
+.timer-sep { color: var(--fk-orange); font-weight: 800; line-height: 1.8; }
+
+/* Deal cards horizontal scroll */
+.deals-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fk-blue) #eee;
+}
+
+.deal-card {
+  flex-shrink: 0;
+  width: 160px;
+  border: 1px solid var(--fk-border);
+  border-radius: var(--fk-radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  background: var(--fk-white);
+}
+.deal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--fk-shadow-lg);
+  border-color: transparent;
+}
+
+.deal-img-wrap {
+  height: 150px;
+  background: var(--fk-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.deal-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.deal-card:hover .deal-img-wrap img { transform: scale(1.08); }
+
+.deal-emoji {
+  font-size: 3.5rem;
+}
+
+.deal-off-badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  background: var(--fk-orange);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+.deal-info {
+  padding: 10px;
+  text-align: center;
+}
+.deal-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--fk-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.deal-discount { color: var(--fk-orange); font-weight: 800; font-size: 0.9rem; margin-top: 2px; }
+.deal-price { color: var(--fk-muted); font-size: 0.75rem; text-decoration: line-through; }

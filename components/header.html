@@ -1,0 +1,43 @@
+<header class="site-header" role="banner">
+  <div class="header-inner">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <a href="/" aria-label="Flipkart Home">
+        <span class="logo-text">Flipkart</span>
+        <span class="logo-sub">Explore <em>Plus</em> ⭐</span>
+      </a>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap" role="search">
+      <div class="search-box">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search for products, brands and more"
+          aria-label="Search"
+          autocomplete="off"
+        />
+        <button class="search-btn" aria-label="Search button" onclick="handleSearch()">
+          🔍
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <nav class="header-actions" aria-label="User actions">
+      <button class="header-btn">Login</button>
+      <button class="header-btn">Become a Seller</button>
+      <button class="header-btn icon-btn" aria-label="More options">☰ More</button>
+
+      <div class="cart-wrap">
+        <button class="header-btn icon-btn" id="cart-btn" aria-label="Cart" onclick="handleCartClick()">
+          🛒 <span>Cart</span>
+        </button>
+        <span class="cart-badge" id="cart-count">0</span>
+      </div>
+    </nav>
+
+  </div>
+</header>

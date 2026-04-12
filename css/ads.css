@@ -1,0 +1,87 @@
+/* ===== ads.css ===== */
+.ads-section {
+  padding: 0 0 24px;
+}
+
+.ads-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.ads-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ad-card {
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  box-shadow: var(--fk-shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: flex-end;
+}
+.ad-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--fk-shadow-lg);
+}
+
+.ad-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+}
+.ad-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 60%);
+}
+
+.ad-content {
+  position: relative;
+  z-index: 1;
+  padding: 14px;
+  color: #fff;
+}
+.ad-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: var(--fk-yellow);
+  color: var(--fk-text);
+  padding: 2px 8px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.ad-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.ad-sub { font-size: 0.75rem; opacity: .85; }
+
+@media (max-width: 768px) {
+  .ads-grid { grid-template-columns: repeat(2, 1fr); }
+  .ads-grid .ad-card:last-child { display: none; }
+}
+@media (max-width: 480px) {
+  .ads-grid { grid-template-columns: 1fr; }
+  .ads-grid .ad-card:last-child { display: flex; }
+}
